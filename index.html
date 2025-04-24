@@ -54,7 +54,7 @@
         if (!targetMesh) return;
 
         const textureLoader = new THREE.TextureLoader();
-        const newTexture = textureLoader.load("https://threejs.org/examples/textures/uv_grid_opengl.jpg", () => {
+        const newTexture = textureLoader.load("https://unpkg.com/three@0.158.0/examples/textures/uv_grid_opengl.jpg", () => {
           targetMesh.material.map = newTexture;
           targetMesh.material.needsUpdate = true;
           console.log("🎨 메터리얼 텍스처가 변경됨!");
