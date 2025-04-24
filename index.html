@@ -2,32 +2,20 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <title>LED 스튜디오</title>
+    <title>LED 메쉬 클릭 테스트</title>
     <style>
       body { margin: 0; overflow: hidden; background-color: #111; }
-      #uploadBox {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        background: #fff;
-        padding: 10px;
-        border-radius: 8px;
-        z-index: 10;
-        font-family: sans-serif;
-      }
+      canvas { display: block; }
     </style>
   </head>
   <body>
-    <div id="uploadBox">
-      <label for="upload">🖼️ LED 이미지 업로드:</label>
-      <input type="file" id="upload" accept="image/*" />
-    </div>
-
     <script type="module">
       import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
       import { GLTFLoader } from 'https://unpkg.com/three@0.158.0/examples/jsm/loaders/GLTFLoader.js';
+      import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js';
 
-      let scene, camera, renderer;
+      let scene, camera, renderer, controls;
+      let targetMesh = null;
       const targetMaterialName = "TEST_MTL";
 
       init();
@@ -41,41 +29,43 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
         const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
         scene.add(light);
 
         const loader = new GLTFLoader();
         loader.load("TEST.glb", (gltf) => {
           scene.add(gltf.scene);
-        }, undefined, (error) => {
-          console.error("GLB 로드 실패:", error);
+          gltf.scene.traverse((child) => {
+            if (child.isMesh && child.material?.name === targetMaterialName) {
+              targetMesh = child;
+              console.log("🎯 클릭 대상 메쉬 등록 완료:", targetMesh);
+            }
+          });
         });
 
+        window.addEventListener('click', onClick);
         animate();
+      }
+
+      function onClick(event) {
+        if (!targetMesh) return;
+
+        const textureLoader = new THREE.TextureLoader();
+        const newTexture = textureLoader.load("https://threejs.org/examples/textures/uv_grid_opengl.jpg", () => {
+          targetMesh.material.map = newTexture;
+          targetMesh.material.needsUpdate = true;
+          console.log("🎨 메터리얼 텍스처가 변경됨!");
+        });
       }
 
       function animate() {
         requestAnimationFrame(animate);
+        controls.update();
         renderer.render(scene, camera);
       }
-
-      document.getElementById("upload").addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          const imageUrl = event.target.result;
-          const texLoader = new THREE.TextureLoader();
-          texLoader.load(imageUrl, (texture) => {
-            scene.traverse((child) => {
-              if (child.isMesh && child.material?.name === targetMaterialName) {
-                child.material.map = texture;
-                child.material.needsUpdate = true;
-              }
-            });
-          });
-        };
-        reader.readAsDataURL(file);
-      });
     </script>
   </body>
 </html>
