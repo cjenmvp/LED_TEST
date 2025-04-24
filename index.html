@@ -2,9 +2,9 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <title>LED 스튜디오 테스트</title>
+    <title>LED 스튜디오</title>
     <style>
-      body { margin: 0; overflow: hidden; background: #111; }
+      body { margin: 0; overflow: hidden; background-color: #111; }
       #uploadBox {
         position: absolute;
         top: 20px;
@@ -48,7 +48,7 @@
         loader.load("TEST.glb", (gltf) => {
           scene.add(gltf.scene);
         }, undefined, (error) => {
-          console.error("❌ GLB 로드 실패:", error);
+          console.error("GLB 로드 실패:", error);
         });
 
         animate();
